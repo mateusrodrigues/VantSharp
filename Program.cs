@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using CommandLine;
 using VantSharp.Configuration;
+using VantSharp.Models;
 
 namespace VantSharp
 {
@@ -23,17 +24,30 @@ namespace VantSharp
 
             using (Stream source = File.OpenRead(opts.InputFile))
             {
-                // Read chunks of 256 bytes from the file
-                // at a time and encode it to save somewhere else.
-                byte[] buffer = new byte[256];
-                List<byte> file = new List<byte>();
+                // Gathering of packet information
                 int bytesRead;
+                int currentId = 1;
+                byte[] buffer = new byte[Packet.PAYLOAD_SIZE];
+                Transmission transmission = new Transmission();
+
                 while ((bytesRead = source.Read(buffer, 0, buffer.Length)) > 0)
                 {
-                    file.AddRange(buffer);
+                    // Copy elements from buffer to new content array
+                    // by 'bytesRead' amount to avoid junk content
+                    // from previous iteration runs.
+                    byte[] content = new byte[bytesRead];
+                    Array.ConstrainedCopy(buffer, 0, content, 0, bytesRead);
+                    // Create a new Packet object to store information gathered
+                    // and add it to the transmission list.
+                    Packet packet = new Packet
+                    {
+                        Id = currentId++,
+                        Content = content
+                    };
+                    transmission.Packets.Add(packet);
                 }
 
-                Console.WriteLine($"The file list is {file.Count} entries long");
+                Console.WriteLine($"Your transmission has {transmission.PacketCount} packets");
             }
 
             return 0;
