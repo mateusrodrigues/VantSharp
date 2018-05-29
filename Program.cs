@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using CommandLine;
 using Serilog;
@@ -35,13 +36,14 @@ namespace VantSharp
 
             Log.Information($"Reading from: {opts.InputFile}");
 
+            Transmission transmission;
             using (Stream source = File.OpenRead(opts.InputFile))
             {
                 // Gathering of packet information
                 int bytesRead;
                 int currentId = 1;
                 byte[] buffer = new byte[Packet.PAYLOAD_SIZE];
-                Transmission transmission = new Transmission();
+                transmission = new Transmission();
 
                 while ((bytesRead = source.Read(buffer, 0, buffer.Length)) > 0)
                 {
@@ -66,6 +68,31 @@ namespace VantSharp
                 }
 
                 Log.Information($"Your transmission has {transmission.PacketCount} packets");
+            }
+
+            // If transmit flag was passed in, initiate the trasmission by
+            // calling the Python script responsible for it
+            if (opts.Transmit)
+            {
+                Log.Information("Starting the transmission...");
+
+                ProcessStartInfo start = new ProcessStartInfo();
+                start.FileName = "python";
+                start.Arguments = string.Format("{0}", "Scripts/transmit.py");
+                start.UseShellExecute = false;
+                start.RedirectStandardOutput = true;
+
+                using (Process process = Process.Start(start))
+                {
+                    // TODO: Find a way to read output lines as they happen
+                    using (StreamReader reader = process.StandardOutput)
+                    {
+                        while (!reader.EndOfStream)
+                        {
+                            Log.Information(reader.ReadLine());
+                        }
+                    }
+                }
             }
 
             return 0;
