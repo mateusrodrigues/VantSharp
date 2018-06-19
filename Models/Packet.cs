@@ -8,10 +8,10 @@ namespace VantSharp.Models
          * headers as well as actual content. The structure for this payload
          * follows the structure as laid here:
          *
-         * -> 3 characters for sequential ID
-         * -> 253 characters for content
+         *    3 characters for sequential ID
+         *  253 characters for content
          * --------------------------------------
-         * -> 256 characters (bytes) TOTAL
+         *  256 characters (bytes) TOTAL
          *
          */
 
