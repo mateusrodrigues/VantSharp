@@ -12,4 +12,10 @@
     <PackageReference Include="Serilog.Sinks.File" Version="4.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="Scripts\**\*" 
+      CopyToPublishDirectory="PreserveNewest"
+      CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

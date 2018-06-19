@@ -56,7 +56,7 @@ namespace VantSharp.Routines
                     transmission.Packets.Add(packet);
                 }
 
-                Log.Information($"Your transmission has {transmission.PacketCount} packets");
+                Log.Information($"Your transmission contains {transmission.PacketCount} packets");
             }
 
             // If transmit flag was passed in, initiate the trasmission by
@@ -66,19 +66,30 @@ namespace VantSharp.Routines
                 Log.Information("Starting the transmission...");
 
                 ProcessStartInfo start = new ProcessStartInfo();
-                start.FileName = "python";
-                start.Arguments = string.Format("{0}", "Scripts/transmit.py");
+                start.FileName = "python3";
                 start.UseShellExecute = false;
                 start.RedirectStandardOutput = true;
 
-                using (Process process = Process.Start(start))
+                // Iterate over packets and trasmit each one
+                for (int i = 1; i <= transmission.PacketCount; i++)
                 {
-                    // TODO: Find a way to read output lines as they happen
-                    using (StreamReader reader = process.StandardOutput)
+                    start.Arguments = string.Format("{0} {1}",
+                        "Scripts/transmit.py",
+                        "TODO: Convert byte[] to correct format to transmit"
+                    );
+
+                    // Log packet transmission status
+                    Log.Information($"Transmitting packet {i} of {transmission.PacketCount}...");
+
+                    using (Process process = Process.Start(start))
                     {
-                        while (!reader.EndOfStream)
+                        // TODO: Find a way to read output lines as they happen
+                        using (StreamReader reader = process.StandardOutput)
                         {
-                            Log.Information(reader.ReadLine());
+                            while (!reader.EndOfStream)
+                            {
+                                Log.Information(reader.ReadLine());
+                            }
                         }
                     }
                 }
