@@ -16,7 +16,7 @@ namespace VantSharp.Configuration
         public bool Verbose { get; set; }
 
         [Option('l', "log", Required = false, HelpText = "Write logging output to a file."
-            + "This file has a .log extension by design.")]
+            + " This file has a .log extension by design.")]
         public string LogOutput { get; set; }
     }
 }
