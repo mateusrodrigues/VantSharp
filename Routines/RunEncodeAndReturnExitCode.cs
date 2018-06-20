@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -84,16 +85,26 @@ namespace VantSharp.Routines
                     // Log packet transmission status
                     Log.Information($"Transmitting packet {i} of {transmission.PacketCount}...");
 
-                    using (Process process = Process.Start(start))
+                    try
                     {
-                        // TODO: Find a way to read output lines as they happen
-                        using (StreamReader reader = process.StandardOutput)
-                        {
-                            while (!reader.EndOfStream)
+                        using (Process process = Process.Start(start))
+                        {   
+                            // TODO: Find a way to read output lines as they happen
+                            using (StreamReader reader = process.StandardOutput)
                             {
-                                Log.Information(reader.ReadLine());
+                                while (!reader.EndOfStream)
+                                {
+                                    Log.Information(reader.ReadLine());
+                                }
                             }
                         }
+                    }
+                    catch (Win32Exception ex)
+                    {
+                        Console.WriteLine("An error has occurred.");
+                        Log.Error("An error occurred while launching the Python process.");
+                        Log.Error($"Executable name: {start.FileName}");
+                        Log.Error($"{ex.NativeErrorCode}: {ex.Message}");
                     }
                 }
             }
