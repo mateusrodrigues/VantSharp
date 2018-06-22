@@ -1,9 +1,8 @@
+using Serilog;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
-using Serilog;
 using VantSharp.Configuration;
 using VantSharp.Models;
 
