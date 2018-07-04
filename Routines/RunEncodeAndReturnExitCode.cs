@@ -67,10 +67,12 @@ namespace VantSharp.Routines
             {
                 Log.Information("Starting the transmission...");
 
-                ProcessStartInfo start = new ProcessStartInfo();
-                start.FileName = "python3";
-                start.UseShellExecute = false;
-                start.RedirectStandardOutput = true;
+                ProcessStartInfo start = new ProcessStartInfo()
+                {
+                    FileName = "python3",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true
+                };
 
                 // Iterate over packets and trasmit each one
                 for (int i = 1; i <= transmission.PacketCount; i++)

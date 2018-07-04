@@ -19,4 +19,16 @@ namespace VantSharp.Configuration
             + " This file has a .log extension by design.")]
         public string LogOutput { get; set; }
     }
+
+    [Verb("init", HelpText = "Initialize listeners for VantSharp")]
+    public class InitOptions
+    {
+
+    }
+
+    [Verb("kill", HelpText = "Kills all running listeners for VantSharp")]
+    public class KillOptions
+    {
+
+    }
 }
