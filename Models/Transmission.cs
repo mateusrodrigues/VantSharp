@@ -1,10 +1,10 @@
-using System;
 using System.Collections.Generic;
 
 namespace VantSharp.Models
 {
     public class Transmission
     {
+        /* Properties */
         private List<Packet> _packets;
         public List<Packet> Packets
         {
@@ -16,6 +16,7 @@ namespace VantSharp.Models
             get => _packets.Count;
         }
         
+        /* Methods */
         public Transmission()
         {
             _packets = new List<Packet>();

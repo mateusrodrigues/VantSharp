@@ -13,9 +13,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Scripts\**\*" 
-      CopyToPublishDirectory="PreserveNewest"
-      CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Scripts\**\*" CopyToPublishDirectory="PreserveNewest" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove=".gitignore" />
   </ItemGroup>
 
 </Project>
