@@ -85,19 +85,16 @@ namespace VantSharp.Routines
 
                     // Log packet transmission status
                     Log.Information($"Transmitting packet {i} of {transmission.PacketCount}...");
+                    Log.Information($"Packet content: {transmission.Packets[i - 1].Encode()}");
 
                     try
                     {
                         using (Process process = Process.Start(start))
                         {   
-                            // TODO: Find a way to read output lines as they happen
-                            using (StreamReader reader = process.StandardOutput)
-                            {
-                                while (!reader.EndOfStream)
-                                {
-                                    Log.Information(reader.ReadLine());
-                                }
-                            }
+                            // TODO: Waiting is necessary since sending
+                            // everything at once may result in loss of data.
+                            // Find a way to wait for successful result.
+                            System.Threading.Thread.Sleep(1000);
                         }
                     }
                     catch (Win32Exception ex)

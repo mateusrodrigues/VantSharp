@@ -11,7 +11,7 @@ serial_port = serial.Serial('/dev/ttyUSB0', 115200)
 xbee = ZigBee(serial_port, escaped=False)
 
 # get and assemble data to send
-DATA = sys.argv[1]
+DATA = bytes.fromhex(sys.argv[1])
 
 # send data
 xbee.send('tx',
