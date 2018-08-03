@@ -94,7 +94,7 @@ namespace VantSharp.Routines
                             // TODO: Waiting is necessary since sending
                             // everything at once may result in loss of data.
                             // Find a way to wait for successful result.
-                            System.Threading.Thread.Sleep(1000);
+                            System.Threading.Thread.Sleep(200);
                         }
                     }
                     catch (Win32Exception ex)
