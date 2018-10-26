@@ -52,7 +52,7 @@ namespace VantSharp.Routines
                     Packet packet = new Packet
                     {
                         Id = currentId++,
-                        Content = content
+                        Payload = content
                     };
                     transmission.Packets.Add(packet);
                 }

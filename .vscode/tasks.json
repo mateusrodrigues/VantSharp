@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/VantSharp.csproj"
+                "${workspaceFolder}/VantSharp/VantSharp.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
