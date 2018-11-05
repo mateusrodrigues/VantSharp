@@ -26,6 +26,8 @@ namespace VantSharp.Models
             _packets = new List<Packet>();
         }
 
+        // This constructor is used for transmissions where files
+        // are present, such as photos, text files, and such.
         public Transmission(string filePath)
         {
             _packets = new List<Packet>();
@@ -81,6 +83,8 @@ namespace VantSharp.Models
 
                     Array.Copy(file, startIndex, packet.Payload,
                         0, length);
+
+                    Packets.Add(packet);
                     startIndex += Packet.PAYLOAD_SIZE;
                 }
             }
