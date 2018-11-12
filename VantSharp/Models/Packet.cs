@@ -1,4 +1,6 @@
 using System;
+using System.Text;
+using Serilog;
 
 namespace VantSharp.Models
 {
@@ -34,21 +36,22 @@ namespace VantSharp.Models
 
     public enum PacketType
     {
-        HANDSHAKE = 0,
-        IMAGE = 1
+        DATA = 0,
+        STATUS = 1,
+        IMAGE = 2
     }
     
     public class Packet
     {
         /* Constants */
         public static int ID_SIZE = 4;
-        public static int HASH_SIZE = 32;
+        public static int HASH_SIZE = 7;
         public static int TYPE_SIZE = 1;
         public static int TAG_SIZE = 4;
         public static int SNO_SIZE = 2;
         public static int DNO_SIZE = 2;
         public static int POS_SIZE = 18;
-        public static int TIME_SIZE = 20;
+        public static int TIME_SIZE = 10;
         public static int LID_SIZE = 4;
         public static int PAYLOAD_SIZE = 256 - (ID_SIZE + TAG_SIZE);
 
@@ -64,11 +67,31 @@ namespace VantSharp.Models
         public int LastIdentification { get; set; }
         public byte[] Payload { get; set; }
 
+        public bool IsFirstPacket { get; set; }
+
         /* Methods */
         public string Encode()
         {
             // Create a byte array to represent whole packet
-            byte[] content = new byte[ID_SIZE + Payload.Length];
+            byte[] content;
+            if (IsFirstPacket)
+            {
+                content = new byte[ID_SIZE
+                    + HASH_SIZE
+                    + TYPE_SIZE
+                    + TAG_SIZE
+                    + SNO_SIZE
+                    + DNO_SIZE
+                    + POS_SIZE 
+                    + TIME_SIZE
+                    + LID_SIZE
+                ];
+            }
+            else
+            {
+                content = new byte[ID_SIZE + TAG_SIZE + Payload.Length];
+            }
+
             // Convert ID to a string of size 3 and leading zeros
             var id = Id.ToString().PadLeft(ID_SIZE, '0');
             // Iterate this string to copy over content to byte array
@@ -76,9 +99,66 @@ namespace VantSharp.Models
             {
                 content[i] = (byte)(id.ToCharArray()[i]);
             }
+
+            // First packet requires special treatment since its contents are
+            // different than ordinary ones.
+            if (IsFirstPacket)
+            {
+                // Copy the hash over to content
+                Array.Copy(Encoding.ASCII.GetBytes(Hash.ToCharArray()),
+                    0, content, ID_SIZE, HASH_SIZE);
+                // Copy the type number over to content
+                var type = ((int) Type).ToString().PadLeft(TYPE_SIZE, '0');
+                Array.Copy(Encoding.ASCII.GetBytes(type.ToCharArray()),
+                    0, content, ID_SIZE + HASH_SIZE, TYPE_SIZE);
+                // Copy the tag over to content
+                var tag = Tag.ToString().PadLeft(TAG_SIZE, '0');
+                Array.Copy(Encoding.ASCII.GetBytes(tag.ToCharArray()),
+                    0, content, ID_SIZE + HASH_SIZE + TYPE_SIZE, TAG_SIZE);
+                // Copy the source node address over to content
+                var sno = SourceNode.ToString().PadLeft(SNO_SIZE, '0');
+                Array.Copy(Encoding.ASCII.GetBytes(sno.ToCharArray()),
+                    0, content, ID_SIZE + HASH_SIZE + TYPE_SIZE + TAG_SIZE, 
+                    SNO_SIZE);
+                // Copy destination node over to content
+                var dno = DestinationNode.ToString().PadLeft(DNO_SIZE, '0');
+                Array.Copy(Encoding.ASCII.GetBytes(dno.ToCharArray()),
+                    0, content, ID_SIZE + HASH_SIZE + TYPE_SIZE + TAG_SIZE 
+                        + SNO_SIZE, 
+                    DNO_SIZE);
+                // Copy the GPS position over to content
+                Array.Copy(Encoding.ASCII.GetBytes(Position.ToCharArray()),
+                    0, content, ID_SIZE + HASH_SIZE + TYPE_SIZE + TAG_SIZE 
+                        + SNO_SIZE + DNO_SIZE,
+                    POS_SIZE);
+                // Copy the timestamp over to content
+                Array.Copy(Encoding.ASCII.GetBytes(Time.ToCharArray()),
+                    0, content, ID_SIZE + HASH_SIZE + TYPE_SIZE + TAG_SIZE 
+                        + SNO_SIZE + DNO_SIZE + POS_SIZE,
+                    TIME_SIZE);
+                // Copy the last identification over to content
+                var lid = LastIdentification.ToString().PadLeft(LID_SIZE, '0');
+                Array.Copy(Encoding.ASCII.GetBytes(lid.ToCharArray()),
+                    0, content, ID_SIZE + HASH_SIZE + TYPE_SIZE + TAG_SIZE 
+                        + SNO_SIZE + DNO_SIZE + POS_SIZE + TIME_SIZE, 
+                    LID_SIZE);
+            }
+            else
+            {
+                // Copy the tag over to content
+                var tag = Tag.ToString().PadLeft(TAG_SIZE, '0');
+                Array.Copy(Encoding.ASCII.GetBytes(tag.ToCharArray()),
+                    0, content, ID_SIZE, TAG_SIZE);
+                // Copy the payload over to content
+                // Use Payload.Length instead of PAYLOAD_SIZE because the last
+                // payload packet may not be of size PAYLOAD_SIZE, triggering an
+                // CLR exception.
+                Array.Copy(Payload, 0, content, ID_SIZE + TAG_SIZE, Payload.Length);
+            }
+
             // Copy rest of the content from Content array starting at array
             // ID_SIZE to skip parts already containing ID
-            Payload.CopyTo(content, ID_SIZE);
+            //Payload.CopyTo(content, ID_SIZE);
 
             // Return result as a string of hex literals representing content
             // byte array

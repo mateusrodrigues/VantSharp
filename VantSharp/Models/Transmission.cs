@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using Serilog;
 
 namespace VantSharp.Models
 {
@@ -54,9 +57,10 @@ namespace VantSharp.Models
                     //TODO: Gather destination node from other tool
                     DestinationNode = 0,
                     //TODO: Gather position from other tool
-                    Position = string.Empty,
+                    Position = "000000000000000000",
                     Time = DateTimeOffset.Now.ToUnixTimeSeconds().ToString(),
-                    LastIdentification = packetCount
+                    LastIdentification = packetCount,
+                    IsFirstPacket = true
                 };
                 Packets.Add(firstPacket);
 
@@ -86,6 +90,52 @@ namespace VantSharp.Models
 
                     Packets.Add(packet);
                     startIndex += Packet.PAYLOAD_SIZE;
+                }
+            }
+        }
+
+        public void Transmit()
+        {
+            ProcessStartInfo start = new ProcessStartInfo()
+            {
+                FileName = "python3",
+                UseShellExecute = false,
+                RedirectStandardOutput = true
+            };
+
+            // Iterate over packets and transmit each one
+            int counter = 0;
+            foreach (var packet in Packets)
+            {
+                var encodedPacket = packet.Encode();
+
+                // Log packet transmission status
+                Log.Information($"Transmitting packet {++counter} of {PacketCount}...");
+                Log.Information($"Packet content: {encodedPacket}");
+
+                // Convert byte[] to a hex array and then to a string and
+                // pass as arguments
+                start.Arguments = string.Format("{0} {1}",
+                    "Scripts/transmit.py",
+                    encodedPacket
+                );
+
+                try
+                {
+                    using (Process process = Process.Start(start))
+                    {
+                        // TODO: Waiting is necessary since sending
+                        // everything at once may result in loss of data.
+                        // Find a way to wait for successful result.
+                        System.Threading.Thread.Sleep(200);
+                    }
+                }
+                catch (Win32Exception ex)
+                {
+                    Console.WriteLine("An error has occurred.");
+                    Log.Error("An error occurred while launching the Python process.");
+                    Log.Error($"Executable name: {start.FileName}");
+                    Log.Error($"{ex.NativeErrorCode}: {ex.Message}");
                 }
             }
         }
