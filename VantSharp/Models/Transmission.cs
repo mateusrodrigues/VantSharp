@@ -127,7 +127,7 @@ namespace VantSharp.Models
                         // TODO: Waiting is necessary since sending
                         // everything at once may result in loss of data.
                         // Find a way to wait for successful result.
-                        System.Threading.Thread.Sleep(200);
+                        System.Threading.Thread.Sleep(500);
                     }
                 }
                 catch (Win32Exception ex)
@@ -137,6 +137,92 @@ namespace VantSharp.Models
                     Log.Error($"Executable name: {start.FileName}");
                     Log.Error($"{ex.NativeErrorCode}: {ex.Message}");
                 }
+            }
+        }
+
+        public void Decode(byte[] transmission)
+        {
+            // Decode first packet
+            int currentIndex = 0;
+            List<byte> bytes = new List<byte>(transmission);
+
+            Packet firstPacket = new Packet();
+
+            firstPacket.Id = int.Parse(
+                Encoding.ASCII.GetString(bytes.GetRange(currentIndex, Packet.ID_SIZE).ToArray())
+            );
+            currentIndex += Packet.ID_SIZE;
+            firstPacket.Hash = Encoding.ASCII.GetString(
+                bytes.GetRange(currentIndex, Packet.HASH_SIZE).ToArray()
+            );
+            currentIndex += Packet.HASH_SIZE;
+            firstPacket.Type = (PacketType) int.Parse(
+                Encoding.ASCII.GetString(bytes.GetRange(currentIndex, Packet.TYPE_SIZE).ToArray())
+            );
+            currentIndex += Packet.TYPE_SIZE;
+            firstPacket.Tag = int.Parse(
+                Encoding.ASCII.GetString(bytes.GetRange(currentIndex, Packet.TAG_SIZE).ToArray())
+            );
+            currentIndex += Packet.TAG_SIZE;
+            firstPacket.SourceNode = int.Parse(
+                Encoding.ASCII.GetString(bytes.GetRange(currentIndex, Packet.SNO_SIZE).ToArray())
+            );
+            currentIndex += Packet.SNO_SIZE;
+            firstPacket.DestinationNode = int.Parse(
+                Encoding.ASCII.GetString(bytes.GetRange(currentIndex, Packet.DNO_SIZE).ToArray())
+            );
+            currentIndex += Packet.DNO_SIZE;
+            firstPacket.Position = Encoding.ASCII.GetString(
+                bytes.GetRange(currentIndex, Packet.POS_SIZE).ToArray()
+            );
+            currentIndex += Packet.POS_SIZE;
+            firstPacket.Time = Encoding.ASCII.GetString(
+                bytes.GetRange(currentIndex, Packet.TIME_SIZE).ToArray()
+            );
+            currentIndex += Packet.TIME_SIZE;
+            firstPacket.LastIdentification = int.Parse(
+                Encoding.ASCII.GetString(bytes.GetRange(currentIndex, Packet.LID_SIZE).ToArray())
+            );
+            currentIndex += Packet.LID_SIZE;
+
+            firstPacket.IsFirstPacket = true;
+            Packets.Add(firstPacket);
+
+            for (int i = 0; i < firstPacket.LastIdentification; i++)
+            {
+                Packet packet = new Packet();
+                
+                packet.Id = int.Parse(
+                    Encoding.ASCII.GetString(bytes.GetRange(currentIndex, Packet.ID_SIZE).ToArray())
+                );
+                currentIndex += Packet.ID_SIZE;
+                packet.Tag = int.Parse(
+                    Encoding.ASCII.GetString(bytes.GetRange(currentIndex, Packet.TAG_SIZE).ToArray())
+                );
+                currentIndex += Packet.TAG_SIZE;
+
+                if (packet.Id == firstPacket.LastIdentification)
+                {
+                    int size = 1;
+                    while (true)
+                    {
+                        try
+                        {
+                            packet.Payload = bytes.GetRange(currentIndex, size++).ToArray();
+                        }
+                        catch (Exception ex)
+                        {
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    packet.Payload = bytes.GetRange(currentIndex, Packet.PAYLOAD_SIZE).ToArray();
+                    currentIndex += Packet.PAYLOAD_SIZE;
+                }
+
+                Packets.Add(packet);
             }
         }
     }

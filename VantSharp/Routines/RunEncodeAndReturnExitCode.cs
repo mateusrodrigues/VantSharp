@@ -29,6 +29,11 @@ namespace VantSharp.Routines
             Transmission transmission = new Transmission(opts.InputFile);
             Log.Information($"Your transmission contains {transmission.PacketCount} packets");
 
+            if (transmission.PacketCount == 0)
+            {
+                return -1;
+            }
+
             if (opts.Transmit)
             {
                 Log.Information("Starting the transmission...");

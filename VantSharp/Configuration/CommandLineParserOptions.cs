@@ -20,6 +20,16 @@ namespace VantSharp.Configuration
         public string LogOutput { get; set; }
     }
 
+    [Verb("decode", HelpText = "Decodes a transmission back to a file.")]
+    public class DecodeOptions
+    {
+        [Option('f', "file", Required = true, HelpText = "Path to file containing the transmission.")]
+        public string InputFile { get; set; }
+
+        [Option('o', "output", Required = false, HelpText = "Name of file to contain transmission data.")]
+        public string OutputFile { get; set; }
+    }
+
     [Verb("init", HelpText = "Initialize listeners for VantSharp")]
     public class InitOptions
     {
