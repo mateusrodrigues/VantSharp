@@ -34,11 +34,14 @@ namespace VantSharp.Models
      *
      */
 
+    // TODO: PacketType -> DataType
     public enum PacketType
     {
-        DATA = 0,
-        STATUS = 1,
+        KEEPALIVE = 0,
+        TEXT = 1,
         IMAGE = 2
+        // TODO: ACK = 3
+        // Próximo pacote: array de IDs faltantes
     }
     
     public class Packet

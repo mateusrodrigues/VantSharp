@@ -7,7 +7,7 @@ from xbee import ZigBee
 arg_count = len(sys.argv)
 
 # create device
-serial_port = serial.Serial('/dev/ttyUSB0', 115200)
+serial_port = serial.Serial('/dev/ttyUSB0', 230400)
 xbee = ZigBee(serial_port, escaped=False)
 
 # get and assemble data to send

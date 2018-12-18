@@ -124,10 +124,7 @@ namespace VantSharp.Models
                 {
                     using (Process process = Process.Start(start))
                     {
-                        // TODO: Waiting is necessary since sending
-                        // everything at once may result in loss of data.
-                        // Find a way to wait for successful result.
-                        System.Threading.Thread.Sleep(500);
+                        process.WaitForExit();
                     }
                 }
                 catch (Win32Exception ex)
