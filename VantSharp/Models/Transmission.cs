@@ -105,13 +105,20 @@ namespace VantSharp.Models
 
             // Iterate over packets and transmit each one
             int counter = 0;
+            TimeSpan totalEncodingElapsedTime = new TimeSpan(0);
+            TimeSpan totalPythonElapsedTime = new TimeSpan(0);
             foreach (var packet in Packets)
             {
+                // Start timer count
+                var startTime = DateTime.Now;
                 var encodedPacket = packet.Encode();
+                var endTime = DateTime.Now;
+                Log.Information($"Packet {counter} took {endTime - startTime} to encode.");
+                totalEncodingElapsedTime += (endTime - startTime);
 
                 // Log packet transmission status
                 Log.Information($"Transmitting packet {++counter} of {PacketCount}...");
-                Log.Information($"Packet content: {encodedPacket}");
+                // Log.Information($"Packet content: {encodedPacket}");
 
                 // Convert byte[] to a hex array and then to a string and
                 // pass as arguments
@@ -122,9 +129,14 @@ namespace VantSharp.Models
 
                 try
                 {
+                    startTime = DateTime.Now;
                     using (Process process = Process.Start(start))
                     {
                         process.WaitForExit();
+                        // Finish timer count
+                        endTime = DateTime.Now;
+                        Log.Information($"Packet {counter} took {endTime - startTime} to transmit.");
+                        totalPythonElapsedTime += (endTime - startTime);
                     }
                 }
                 catch (Win32Exception ex)
@@ -135,6 +147,9 @@ namespace VantSharp.Models
                     Log.Error($"{ex.NativeErrorCode}: {ex.Message}");
                 }
             }
+
+            Log.Information($"The total encoding time was {totalEncodingElapsedTime}.");
+            Log.Information($"The total transmission time was {totalPythonElapsedTime}.");
         }
 
         public void Decode(byte[] transmission)

@@ -34,7 +34,7 @@ namespace VantSharp.Models
      *
      */
 
-    // TODO: PacketType -> DataType
+    // TODO: PacketType rename to DataType
     public enum PacketType
     {
         KEEPALIVE = 0,
